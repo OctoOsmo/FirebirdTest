@@ -1,0 +1,11 @@
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\bin\Debug\FirebirdTest.exe.config
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\bin\Debug\FirebirdTest.exe
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\bin\Debug\FirebirdTest.pdb
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\obj\Debug\FirebirdTest.csprojResolveAssemblyReference.cache
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\obj\Debug\FirebirdTest.Properties.Resources.resources
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\obj\Debug\FirebirdTest.csproj.GenerateResource.Cache
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\obj\Debug\FirebirdTest.exe
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\obj\Debug\FirebirdTest.pdb
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\bin\Debug\FirebirdSql.Data.FirebirdClient.dll
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\bin\Debug\FirebirdSql.Data.FirebirdClient.pdb
+C:\Users\Александр\Documents\GitHub\FirebirdTest\FirebirdTest\obj\Debug\FirebirdTest.FormMain.resources
