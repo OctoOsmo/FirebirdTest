@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FirebirdSql.Data.FirebirdClient;
+
 //using FirebirdSql.Data.Common;
 
 namespace FirebirdTest
@@ -21,7 +22,7 @@ namespace FirebirdTest
         {
             InitializeComponent();
         }
-
+     
         private void buttonConnect_Click(object sender, EventArgs e)
         {
             //формируем connection string для последующего соединения с нашей базой данных
@@ -86,6 +87,12 @@ namespace FirebirdTest
             }
             MessageBox.Show(select_result); //выводим результат запроса
             SelectSQL.Dispose(); //в документации написано, что ОЧЕНЬ рекомендуется убивать объекты этого типа, если они больше не нужны
+        }
+
+        private void buttonSaveXML_Click(object sender, EventArgs e)
+        {
+            xmlPackageGenerator xmlGen = new xmlPackageGenerator();
+            xmlGen.CreatePackageData("C:\\Users\\Александр\\Dropbox\\Программы\\FirebirdTest\\sample.xml");
         }
     }
 }

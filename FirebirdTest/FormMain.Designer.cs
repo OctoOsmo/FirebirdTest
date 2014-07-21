@@ -36,6 +36,7 @@
             this.textBoxLogin = new System.Windows.Forms.TextBox();
             this.textBoxPass = new System.Windows.Forms.TextBox();
             this.buttonSelect = new System.Windows.Forms.Button();
+            this.buttonSaveXML = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -111,11 +112,22 @@
             this.buttonSelect.UseVisualStyleBackColor = true;
             this.buttonSelect.Click += new System.EventHandler(this.buttonSelect_Click);
             // 
+            // buttonSaveXML
+            // 
+            this.buttonSaveXML.Location = new System.Drawing.Point(290, 51);
+            this.buttonSaveXML.Name = "buttonSaveXML";
+            this.buttonSaveXML.Size = new System.Drawing.Size(94, 22);
+            this.buttonSaveXML.TabIndex = 6;
+            this.buttonSaveXML.Text = "Save to XML";
+            this.buttonSaveXML.UseVisualStyleBackColor = true;
+            this.buttonSaveXML.Click += new System.EventHandler(this.buttonSaveXML_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(442, 315);
+            this.Controls.Add(this.buttonSaveXML);
             this.Controls.Add(this.buttonSelect);
             this.Controls.Add(this.textBoxPass);
             this.Controls.Add(this.textBoxLogin);
@@ -142,6 +154,7 @@
         private System.Windows.Forms.TextBox textBoxLogin;
         private System.Windows.Forms.TextBox textBoxPass;
         private System.Windows.Forms.Button buttonSelect;
+        private System.Windows.Forms.Button buttonSaveXML;
     }
 }
 
