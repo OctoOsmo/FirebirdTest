@@ -27,6 +27,7 @@ FirebirdTest/
 *.gdb
 *.Cache
 *.pdb
+*.xml
 
 #################
 ## Visual Studio
