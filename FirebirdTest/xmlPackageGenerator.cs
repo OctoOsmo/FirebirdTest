@@ -131,11 +131,65 @@ namespace FirebirdTest
             return name;
         }
 
+        private string GetMiddleName(int nom_ab)
+        {
+            string MiddleName = "";
+            //проверка состояния соединения (активно или не активно)
+            if (this.fb.State == System.Data.ConnectionState.Closed)
+                this.fb.Open();
+            FbTransaction fbt = fb.BeginTransaction(); //стартуем транзакцию; стартовать транзакцию можно только для открытой базы (т.е. мутод Open() уже был вызван ранее, иначе ошибка)            
+            string sql_text = "Select OTCH from ABIT where NOM_AB=" + nom_ab.ToString();
+            FbCommand SelectSQL = new FbCommand(sql_text, fb); //задаем запрос на выборку
+            SelectSQL.Transaction = fbt; //необходимо проинициализить транзакцию для объекта SelectSQL
+            FbDataReader Reader = SelectSQL.ExecuteReader();
+            try
+            {
+                Reader.Read();
+                MiddleName = Reader.GetString(0);
+            }
+            finally
+            {
+                Reader.Close();
+                fb.Close();
+            }
+            Reader.Close();
+            SelectSQL.Dispose();
+            return MiddleName;
+        }
+
+        private string GetLastName(int nom_ab)
+        {
+            string LastName = "";
+            //проверка состояния соединения (активно или не активно)
+            if (this.fb.State == System.Data.ConnectionState.Closed)
+                this.fb.Open();
+            FbTransaction fbt = fb.BeginTransaction(); //стартуем транзакцию; стартовать транзакцию можно только для открытой базы (т.е. мутод Open() уже был вызван ранее, иначе ошибка)            
+            string sql_text = "Select FAM from ABIT where NOM_AB=" + nom_ab.ToString();
+            FbCommand SelectSQL = new FbCommand(sql_text, fb); //задаем запрос на выборку
+            SelectSQL.Transaction = fbt; //необходимо проинициализить транзакцию для объекта SelectSQL
+            FbDataReader Reader = SelectSQL.ExecuteReader();
+            try
+            {
+                Reader.Read();
+                LastName = Reader.GetString(0);
+            }
+            finally
+            {
+                Reader.Close();
+                fb.Close();
+            }
+            Reader.Close();
+            SelectSQL.Dispose();
+            return LastName;
+        }
+
         private void AddEntrant(XmlDocument document, XmlNode parent, int nom_ab)
         {
             XmlNode Entrant = InsertTag(document, parent, "Entrant", "");
             InsertTag(document, Entrant, "UID", "2014" + nom_ab.ToString());
             InsertTag(document, Entrant, "FirstName", GetName(nom_ab));
+            InsertTag(document, Entrant, "MiddleName", GetMiddleName(nom_ab));
+            InsertTag(document, Entrant, "LastName", GetLastName(nom_ab));
         }
 
         private void AddApplication(XmlDocument document, XmlNode parent, int nom_af, int nom_ab)
@@ -146,8 +200,8 @@ namespace FirebirdTest
             InsertTag(document, application, "ApplicationNumber", "2014" + (nom_af + 1).ToString());
             AddEntrant(document, application, nom_ab);
             InsertTag(document, application, "RegistrationDate", reg_date);
-            InsertTag(document, application, "NeedHostel", "0");
-            InsertTag(document, application, "StatusID", "4");
+            //InsertTag(document, application, "NeedHostel", "0");
+            //InsertTag(document, application, "StatusID", "4");
         }
 
         //private FbDataReader GetReader(string sql_text)
@@ -171,7 +225,7 @@ namespace FirebirdTest
             if (fb_applications.State == System.Data.ConnectionState.Closed)
                 fb_applications.Open();
             FbTransaction fbt = fb_applications.BeginTransaction(); //стартуем транзакцию; стартовать транзакцию можно только для открытой базы (т.е. мутод Open() уже был вызван ранее, иначе ошибка)
-            string sql_text = "SELECT af.* FROM ABIT_FAK af LEFT JOIN ABIT a on a.NOM_AB=af.NOM_AB WHERE af.STATUS_Z not in (3,6) AND a.ZABR not in (1,2) AND a.DOK_IN_PK=1 AND af.nom_af < 2000 ORDER BY af.NOM_AF";
+            string sql_text = "SELECT af.* FROM ABIT_FAK af LEFT JOIN ABIT a on a.NOM_AB=af.NOM_AB WHERE af.STATUS_Z not in (3,6) AND a.ZABR not in (1,2) AND a.DOK_IN_PK=1 AND af.nom_af < 1000 ORDER BY af.NOM_AF";
             FbCommand SelectSQL = new FbCommand(sql_text, fb_applications); //задаем запрос на выборку
             SelectSQL.Transaction = fbt; //необходимо проинициализить транзакцию для объекта SelectSQL
             FbDataReader applicationsReader = SelectSQL.ExecuteReader(); //для запросов, которые возвращают результат в виде набора данных надо использоваться метод ExecuteReader()
