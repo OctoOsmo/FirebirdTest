@@ -255,3 +255,7 @@ $RECYCLE.BIN/
 *.cache
 *.pdb
 *.pdb
+*.cache
+*.Cache
+FirebirdTest/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+*.pdb

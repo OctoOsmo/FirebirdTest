@@ -92,7 +92,7 @@ namespace FirebirdTest
         private void buttonSaveXML_Click(object sender, EventArgs e)
         {
             xmlPackageGenerator xmlGen = new xmlPackageGenerator();
-            xmlGen.CreatePackageData("C:\\Users\\Александр\\Dropbox\\Программы\\FirebirdTest\\sample.xml");
+            xmlGen.CreatePackageData("..\\..\\..\\sample.xml");
         }
     }
 }
