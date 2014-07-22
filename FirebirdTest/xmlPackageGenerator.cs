@@ -183,6 +183,40 @@ namespace FirebirdTest
             return LastName;
         }
 
+        private string GetGenderId(int nom_ab)
+        {
+            string GenderId = "";
+            //проверка состояния соединения (активно или не активно)
+            if (this.fb.State == System.Data.ConnectionState.Closed)
+                this.fb.Open();
+            FbTransaction fbt = fb.BeginTransaction(); //стартуем транзакцию; стартовать транзакцию можно только для открытой базы (т.е. мутод Open() уже был вызван ранее, иначе ошибка)            
+            string sql_text = "SELECT POL from ABIT where NOM_AB=" + nom_ab.ToString();
+            FbCommand SelectSQL = new FbCommand(sql_text, fb); //задаем запрос на выборку
+            SelectSQL.Transaction = fbt; //необходимо проинициализить транзакцию для объекта SelectSQL
+            FbDataReader Reader = SelectSQL.ExecuteReader();
+            try
+            {
+                Reader.Read();
+                GenderId = Reader.GetString(0);
+            }
+            finally
+            {
+                Reader.Close();
+                fb.Close();
+            }
+            Reader.Close();
+            SelectSQL.Dispose();
+            if (GenderId == "М")
+            {
+                GenderId = "1";
+            }
+            else
+            {
+                GenderId = "2";
+            }
+            return GenderId;
+        }
+
         private void AddEntrant(XmlDocument document, XmlNode parent, int nom_ab)
         {
             XmlNode Entrant = InsertTag(document, parent, "Entrant", "");
@@ -190,6 +224,7 @@ namespace FirebirdTest
             InsertTag(document, Entrant, "FirstName", GetName(nom_ab));
             InsertTag(document, Entrant, "MiddleName", GetMiddleName(nom_ab));
             InsertTag(document, Entrant, "LastName", GetLastName(nom_ab));
+            InsertTag(document, Entrant, "GenderId", GetGenderId(nom_ab));
         }
 
         private void AddApplication(XmlDocument document, XmlNode parent, int nom_af, int nom_ab)
