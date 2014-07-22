@@ -4,18 +4,55 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using FirebirdSql.Data.FirebirdClient;
 
 namespace FirebirdTest
 {
     class xmlPackageGenerator
     {
 
+        //FbConnection fb_main, fb;
+        FbConnection fb;
+
+        string login, password, db_path;
+
+        //public xmlPackageGenerator(FbConnection fb)
+        //{
+        //    this.fb = fb;
+        //}
+
+        private FbConnection CreateFbConnection()
+        {
+            FbConnection fbc;
+            //формируем connection string для последующего соединения с нашей базой данных
+            FbConnectionStringBuilder fb_con = new FbConnectionStringBuilder();
+            fb_con.Charset = "WIN1251"; //используемая кодировка
+            fb_con.UserID = login; //логин
+            fb_con.Password = password; //пароль
+            fb_con.Database = db_path; //путь к файлу базы данных
+            fb_con.ServerType = 0; //указываем тип сервера (0 - "полноценный Firebird" (classic или super server), 1 - встроенный (embedded))
+
+            //создаем подключение
+            fbc = new FbConnection(fb_con.ToString()); //передаем нашу строку подключения объекту класса FbConnection
+
+            fbc.Open(); //открываем БД
+            return fbc;
+        }
+
+        public xmlPackageGenerator(string login, string password, string db_path)
+        {
+            this.login = login;
+            this.password = password;
+            this.db_path = db_path;
+            this.fb = CreateFbConnection();
+        }
+
         private XmlNode InsertTag(XmlDocument document, XmlNode parent, string nodeName, string node_value)
         {
             if (node_value.Length == 0)
             {
                 XmlNode Node = document.CreateElement(nodeName);// даём имя
-                document.DocumentElement.AppendChild(Node);// и указываем кому принадлежит
+                parent.AppendChild(Node);// и указываем кому принадлежит
                 return Node;
             }
             else
@@ -29,35 +66,137 @@ namespace FirebirdTest
 
         private void AddAuthData(XmlDocument document)
         {
-            //XmlNode AuthData = InsertTag(document, document.DocumentElement, "AuthData", "");
             XmlNode AuthData = document.CreateElement("AuthData"); // даём имя
-            //subElement1.InnerText = "Hello"; // и значение
             document.DocumentElement.AppendChild(AuthData); // и указываем кому принадлежит
-
             InsertTag(document, AuthData, "Login", "at@vsma.ac.ru");
-            //XmlNode Login = document.CreateElement("Login"); // даём имя
-            //Login.InnerText = "at@vsma.ac.ru"; // и значение
-            //AuthData.AppendChild(Login); // и указываем кому принадлежит
-
-            InsertTag(document, AuthData, "Pass", "BRalQhv");
-            //XmlNode Pass = document.CreateElement("Pass"); // даём имя
-            //Pass.InnerText = "BRalQhv"; // и значение
-            //AuthData.AppendChild(Pass); // и указываем кому принадлежит         
+            InsertTag(document, AuthData, "Pass", "BRalQhv");       
         }
 
-        private void AddApplication(XmlDocument document, XmlNode parent)
+        private string GetRegistrationDate(int nom_ab)
         {
+            DateTime reg_date = DateTime.Now;
+            //проверка состояния соединения (активно или не активно)
+            if (this.fb.State == System.Data.ConnectionState.Closed)
+                this.fb.Open();
+            FbTransaction fbt = fb.BeginTransaction(); //стартуем транзакцию; стартовать транзакцию можно только для открытой базы (т.е. мутод Open() уже был вызван ранее, иначе ошибка)            
+            string sql_text = "select KOPIA, DAT_PZ, USER_KOPIA_DAT_NA_0 from ABIT where NOM_AB=" + nom_ab.ToString();
+            FbCommand SelectSQL = new FbCommand(sql_text, fb); //задаем запрос на выборку
+            SelectSQL.Transaction = fbt; //необходимо проинициализить транзакцию для объекта SelectSQL
+            FbDataReader regDateReader = SelectSQL.ExecuteReader();
+            try
+            {
+                regDateReader.Read();
+                if (0 == regDateReader.GetInt32(0))
+                {
+                    if ("" != regDateReader.GetString(2))
+                    {
+                        reg_date = regDateReader.GetDateTime(2);
+                    }
+                }
+                else reg_date = regDateReader.GetDateTime(1);
+            }
+            finally
+            {
+                regDateReader.Close();
+                fb.Close();
+            }
+            regDateReader.Close();
+            SelectSQL.Dispose();
+            return reg_date.ToString();
+        }
+
+        private string GetName(int nom_ab)
+        {
+            string name = "";
+            //проверка состояния соединения (активно или не активно)
+            if (this.fb.State == System.Data.ConnectionState.Closed)
+                this.fb.Open();
+            FbTransaction fbt = fb.BeginTransaction(); //стартуем транзакцию; стартовать транзакцию можно только для открытой базы (т.е. мутод Open() уже был вызван ранее, иначе ошибка)            
+            string sql_text = "Select NAM from ABIT where NOM_AB=" + nom_ab.ToString();
+            FbCommand SelectSQL = new FbCommand(sql_text, fb); //задаем запрос на выборку
+            SelectSQL.Transaction = fbt; //необходимо проинициализить транзакцию для объекта SelectSQL
+            FbDataReader Reader = SelectSQL.ExecuteReader();
+            try
+            {
+                Reader.Read();
+                name = Reader.GetString(0);
+            }
+            finally
+            {
+                Reader.Close();
+                fb.Close();
+            }
+            Reader.Close();
+            SelectSQL.Dispose();
+            return name;
+        }
+
+        private void AddEntrant(XmlDocument document, XmlNode parent, int nom_ab)
+        {
+            XmlNode Entrant = InsertTag(document, parent, "Entrant", "");
+            InsertTag(document, Entrant, "UID", "2014" + nom_ab.ToString());
+            InsertTag(document, Entrant, "FirstName", GetName(nom_ab));
+        }
+
+        private void AddApplication(XmlDocument document, XmlNode parent, int nom_af, int nom_ab)
+        {
+            string reg_date = GetRegistrationDate(nom_ab);//дата регистрации заявления
             XmlNode application = InsertTag(document, parent, "application", "");
-            InsertTag(document, application, "UID", "23");
-            InsertTag(document, application, "ApplicationNumber", "24");
+            InsertTag(document, application, "UID", "20142014" + nom_af.ToString());
+            InsertTag(document, application, "ApplicationNumber", "2014" + (nom_af + 1).ToString());
+            AddEntrant(document, application, nom_ab);
+            InsertTag(document, application, "RegistrationDate", reg_date);
             InsertTag(document, application, "NeedHostel", "0");
             InsertTag(document, application, "StatusID", "4");
         }
 
+        //private FbDataReader GetReader(string sql_text)
+        //{
+        //    FbConnection fb_conn = CreateFbConnection();
+        //    //проверка состояния соединения (активно или не активно)
+        //    if (fb_conn.State == System.Data.ConnectionState.Closed)
+        //        fb_conn.Open();
+        //    FbTransaction fbt = fb_conn.BeginTransaction(); //стартуем транзакцию; стартовать транзакцию можно только для открытой базы (т.е. мутод Open() уже был вызван ранее, иначе ошибка)
+        //    FbCommand SelectSQL = new FbCommand(sql_text, fb_conn); //задаем запрос на выборку
+        //    SelectSQL.Transaction = fbt; //необходимо проинициализить транзакцию для объекта SelectSQL
+        //    FbDataReader reader = SelectSQL.ExecuteReader(); //для запросов, которые возвращают результат в виде набора данных надо использоваться метод ExecuteReader()
+        //    return reader;
+        //}
+
         private XmlNode AddApplications(XmlDocument document, XmlNode parent)
         {
             XmlNode applications = InsertTag(document, parent, "Applications", "");
-            AddApplication(document, applications);
+            FbConnection fb_applications = CreateFbConnection();
+            //проверка состояния соединения (активно или не активно)
+            if (fb_applications.State == System.Data.ConnectionState.Closed)
+                fb_applications.Open();
+            FbTransaction fbt = fb_applications.BeginTransaction(); //стартуем транзакцию; стартовать транзакцию можно только для открытой базы (т.е. мутод Open() уже был вызван ранее, иначе ошибка)
+            string sql_text = "SELECT af.* FROM ABIT_FAK af LEFT JOIN ABIT a on a.NOM_AB=af.NOM_AB WHERE af.STATUS_Z not in (3,6) AND a.ZABR not in (1,2) AND a.DOK_IN_PK=1 AND af.nom_af < 2000 ORDER BY af.NOM_AF";
+            FbCommand SelectSQL = new FbCommand(sql_text, fb_applications); //задаем запрос на выборку
+            SelectSQL.Transaction = fbt; //необходимо проинициализить транзакцию для объекта SelectSQL
+            FbDataReader applicationsReader = SelectSQL.ExecuteReader(); //для запросов, которые возвращают результат в виде набора данных надо использоваться метод ExecuteReader()
+            string select_result = ""; //в эту переменную будем складывать результат запроса Select
+            //textBoxResult.Clear();
+
+            try
+            {
+                while (applicationsReader.Read()) //пока не прочли все данные выполняем...
+                {
+                    // select_result = select_result + reader.GetInt32(0).ToString() + ", " + reader.GetString(1) + "\n";
+                    select_result = select_result + applicationsReader.GetString(0) + " " + applicationsReader.GetString(1) + " " + applicationsReader.GetString(2) + "\n";
+                    AddApplication(document, applications, applicationsReader.GetInt32(0), applicationsReader.GetInt32(1));
+                    //textBoxResult.Text += reader.GetString(0) + " " + reader.GetString(1) + " " + reader.GetString(2) + " " + reader.GetString(3) + "\n";
+                }
+            }
+            finally
+            {
+                //всегда необходимо вызывать метод Close(), когда чтение данных завершено
+                applicationsReader.Close();
+                fb_applications.Close(); //закрываем соединение, т.к. оно нам больше не нужно
+            }
+
+            //MessageBox.Show(select_result); //выводим результат запроса
+            SelectSQL.Dispose(); //в документации написано, что ОЧЕНЬ рекомендуется убивать объекты этого типа, если они больше не нужны            
             return applications;
         }
 

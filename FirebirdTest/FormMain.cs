@@ -22,7 +22,7 @@ namespace FirebirdTest
         {
             InitializeComponent();
         }
-     
+
         private void buttonConnect_Click(object sender, EventArgs e)
         {
             //формируем connection string для последующего соединения с нашей базой данных
@@ -51,7 +51,7 @@ namespace FirebirdTest
 
         private void buttonSelect_Click(object sender, EventArgs e)
         {
-            //так проверять состояние соединения (активно или не активно)
+            //проверка состояния соединения (активно или не активно)
             if (fb.State == ConnectionState.Closed)
                 fb.Open();
 
@@ -59,7 +59,7 @@ namespace FirebirdTest
             FbTransaction fbt = fb.BeginTransaction(); //стартуем транзакцию; стартовать транзакцию можно только для открытой базы (т.е. мутод Open() уже был вызван ранее, иначе ошибка)
 
 
-            FbCommand SelectSQL = new FbCommand("SELECT * FROM SPISOK_ST", fb); //задаем запрос на выборку
+            FbCommand SelectSQL = new FbCommand("SELECT af.* FROM ABIT_FAK af LEFT JOIN ABIT a on a.NOM_AB=af.NOM_AB WHERE af.STATUS_Z not in (3,6) AND a.ZABR not in (1,2) AND a.DOK_IN_PK=1 ORDER BY af.NOM_AF", fb); //задаем запрос на выборку
 
 
             SelectSQL.Transaction = fbt; //необходимо проинициализить транзакцию для объекта SelectSQL
@@ -75,7 +75,7 @@ namespace FirebirdTest
                 while (reader.Read()) //пока не прочли все данные выполняем...
                 {
                     // select_result = select_result + reader.GetInt32(0).ToString() + ", " + reader.GetString(1) + "\n";
-                    select_result = select_result + reader.GetString(0) + " " + reader.GetString(1) + " " + reader.GetString(2) + " " + reader.GetString(3) + "\n";
+                    select_result = select_result + reader.GetString(0) +" " + reader.GetString(1) + " " + reader.GetString(2) + " " + reader.GetString(3) + "\n";
                     //textBoxResult.Text += reader.GetString(0) + " " + reader.GetString(1) + " " + reader.GetString(2) + " " + reader.GetString(3) + "\n";
                 }
             }
@@ -91,7 +91,8 @@ namespace FirebirdTest
 
         private void buttonSaveXML_Click(object sender, EventArgs e)
         {
-            xmlPackageGenerator xmlGen = new xmlPackageGenerator();
+            xmlPackageGenerator xmlGen = new xmlPackageGenerator(textBoxLogin.Text, textBoxPass.Text, textBoxDBPath.Text);
+            //xmlPackageGenerator xmlGen = new xmlPackageGenerator(fb);
             xmlGen.CreatePackageData("..\\..\\..\\sample.xml");
         }
     }

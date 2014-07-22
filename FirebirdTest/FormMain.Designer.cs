@@ -83,7 +83,7 @@
             this.textBoxDBPath.Name = "textBoxDBPath";
             this.textBoxDBPath.Size = new System.Drawing.Size(420, 20);
             this.textBoxDBPath.TabIndex = 2;
-            this.textBoxDBPath.Text = "D:\\Программы\\Тесты\\Последний релиз\\TEST_VSMA.GDB";
+            this.textBoxDBPath.Text = "D:\\Cloud@Mail.Ru\\Программы\\FirebirdTest\\Abit2014.gdb";
             // 
             // textBoxLogin
             // 
